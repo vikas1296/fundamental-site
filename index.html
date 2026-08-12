@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FundaMental — Funda over FOMO</title>
+<meta name="description" content="FundaMental: a neo-brutalist app that turns dense topics — investing, markets, AI, and whatever comes next — into a five-minute daily habit. Word of the Day, deep-dive articles, and Term Match — the flashcard game that makes it stick." />
+<link rel="icon" href="assets/icon-512.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --background: #FCF9F8;
+    --surface: #FFFFFF;
+    --surface-low: #F6F3F2;
+    --surface-high: #EBE7E7;
+    --on-bg: #1C1B1B;
+    --on-surface-variant: #5C5F52;
+    --border: #000000;
+
+    --primary: #4C1D95;
+    --on-primary: #FFFFFF;
+    --primary-container: #EDE9FE;
+
+    --secondary: #821DDA;
+    --on-secondary: #FFFFFF;
+    --secondary-container: #EFDBFF;
+
+    --accent: #CCFF00;
+    --on-accent: #1C1B1B;
+
+    --tertiary: #0D9488;
+    --on-tertiary: #FFFFFF;
+    --tertiary-container: #8DFFFE;
+
+    --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
+
+    --bw: 2.5px;
+    --shadow-sm: 4px 4px 0 var(--border);
+    --shadow-lg: 8px 8px 0 var(--border);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--on-bg);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01em; }
+  p { margin: 0; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+  .mono { font-family: var(--font-mono); }
+
+  /* ---------- decorative background ---------- */
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image:
+      radial-gradient(circle, rgba(28,27,27,0.06) 1.4px, transparent 1.4px);
+    background-size: 26px 26px;
+    pointer-events: none;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(0px);
+    z-index: -1;
+    opacity: 0.55;
+  }
+
+  /* ---------- nav ---------- */
+  header.site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(252, 249, 248, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: var(--bw) solid var(--border);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img {
+    width: 36px; height: 36px; border-radius: 9px;
+    border: var(--bw) solid var(--border);
+    box-shadow: 2px 2px 0 var(--border);
+  }
+  .brand span { font-family: var(--font-display); font-weight: 800; font-size: 19px; }
+  nav.links { display: flex; gap: 32px; align-items: center; }
+  nav.links a {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--on-bg);
+    opacity: 0.75;
+    transition: opacity 0.15s ease;
+  }
+  nav.links a:hover { opacity: 1; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    border: var(--bw) solid var(--border);
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--border); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--border); }
+  .btn.ghost { background: var(--surface); color: var(--on-bg); }
+  .btn.accent { background: var(--accent); color: var(--on-accent); }
+  .nav-cta { display: none; }
+  @media (min-width: 720px) { .nav-cta { display: inline-flex; } }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 76px 0 60px;
+    perspective: 1400px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  @media (min-width: 980px) {
+    .hero-grid { grid-template-columns: 1.05fr 0.95fr; }
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 7px 14px;
+    border: var(--bw) solid var(--border);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    transform: rotate(-2deg);
+  }
+  .hero h1 {
+    font-size: clamp(38px, 5.4vw, 62px);
+    font-weight: 800;
+    line-height: 1.03;
+    margin-top: 22px;
+  }
+  .hero h1 .accent-underline {
+    position: relative;
+    white-space: nowrap;
+  }
+  .hero h1 .accent-underline::after {
+    content: "";
+    position: absolute;
+    left: -2px; right: -2px; bottom: 2px;
+    height: 0.32em;
+    background: var(--accent);
+    z-index: -1;
+    transform: skewX(-6deg);
+  }
+  .hero p.lead {
+    margin-top: 22px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+    max-width: 480px;
+  }
+  .hero-actions {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+  }
+  .store-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border: var(--bw) solid var(--border);
+    border-radius: 10px;
+    background: var(--on-bg);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    cursor: default;
+  }
+  .store-badge:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--border); }
+  .store-badge .icon { font-size: 20px; line-height: 1; }
+  .store-badge .txt { display: flex; flex-direction: column; line-height: 1.15; }
+  .store-badge .txt small { font-size: 9.5px; opacity: 0.75; font-family: var(--font-mono); letter-spacing: 0.04em; }
+  .store-badge .txt strong { font-size: 14px; font-family: var(--font-display); font-weight: 700; }
+  .store-badge .soon {
+    margin-left: 4px;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 3px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+
+  .proof-row {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .proof-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 9px 15px;
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    box-shadow: 2px 2px 0 var(--border);
+  }
+
+  /* ---------- 3D hero assembly stage ---------- */
+  .hero-3d-stage {
+    position: relative;
+    height: 600px;
+    perspective: 1800px;
+  }
+  .hero-3d-scene {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease-out;
+  }
+
+  /* slow-spinning dashed orbit ring, purely decorative depth cue */
+  .orbit-ring {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 420px; height: 420px;
+    margin: -210px 0 0 -210px;
+    border: 1.5px dashed rgba(28,27,27,0.18);
+    border-radius: 50%;
+    transform: translateZ(-180px) rotateX(72deg);
+    animation: spin-ring 26s linear infinite;
+  }
+  .orbit-ring.r2 {
+    width: 500px; height: 500px;
+    margin: -250px 0 0 -250px;
+    border-color: rgba(76,29,149,0.14);
+    transform: translateZ(-260px) rotateX(72deg) rotateZ(35deg);
+    animation-duration: 34s;
+    animation-direction: reverse;
+  }
+  @keyframes spin-ring { to { transform: translateZ(-180px) rotateX(72deg) rotateY(360deg); } }
+
+  /* soft ambient shadow puddle beneath the phone */
+  .phone-shadow {
+    position: absolute;
+    left: 50%; top: 78%;
+    width: 260px; height: 60px;
+    margin-left: -130px;
+    background: radial-gradient(ellipse at center, rgba(28,27,27,0.35) 0%, rgba(28,27,27,0) 72%);
+    transform: translateZ(-120px) rotateX(90deg);
+    filter: blur(2px);
+  }
+
+  /* the hero phone itself: metal-frame bezel + glossy screen */
+  .phone-hero {
+    position: absolute;
+    left: 50%; top: 46px;
+    width: 272px;
+    margin-left: -136px;
+    transform: translateZ(30px);
+    transform-style: preserve-3d;
+  }
+  .phone-hero-frame {
+    background: var(--on-bg);
+    border: 3px solid var(--border);
+    border-radius: 42px;
+    padding: 10px;
+    box-shadow: 14px 18px 0 rgba(28,27,27,0.9), 0 40px 60px rgba(28,27,27,0.25);
+    position: relative;
+  }
+  .phone-hero-frame::before {
+    /* glossy diagonal sheen */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 39px;
+    background: linear-gradient(115deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 28%, rgba(255,255,255,0) 46%);
+    pointer-events: none;
+    z-index: 5;
+  }
+  .side-btn {
+    position: absolute;
+    background: #2a2a2a;
+    border: 2px solid var(--border);
+  }
+  .side-btn.power { right: -5px; top: 90px; width: 5px; height: 46px; border-radius: 0 3px 3px 0; }
+  .side-btn.vol1 { left: -5px; top: 78px; width: 5px; height: 30px; border-radius: 3px 0 0 3px; }
+  .side-btn.vol2 { left: -5px; top: 116px; width: 5px; height: 30px; border-radius: 3px 0 0 3px; }
+
+  .dynamic-island {
+    position: absolute;
+    left: 50%; top: 20px;
+    width: 84px; height: 20px;
+    margin-left: -42px;
+    background: #000;
+    border-radius: 999px;
+    z-index: 6;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 12px;
+  }
+  .dynamic-island::after {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2a3a55;
+  }
+
+  .phone-hero-screen {
+    position: relative;
+    background: var(--background);
+    border-radius: 34px;
+    overflow: hidden;
+    height: 500px;
+    padding-top: 34px;
+  }
+
+  /* individual app screens flying together to form the whole app */
+  .screen-layer {
+    position: absolute;
+    inset: 34px 0 0 0;
+    padding: 8px 14px 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
+    transform-style: preserve-3d;
+  }
+  .screen-layer.active { opacity: 1; pointer-events: auto; transform: translate3d(0,0,0) rotate(0deg) scale(1) !important; }
+
+  .screen-layer[data-from="left"]   { transform: translate3d(-320px, 30px, -260px) rotateY(-62deg) rotateX(8deg) scale(0.78); }
+  .screen-layer[data-from="right"]  { transform: translate3d(320px, 30px, -260px) rotateY(62deg) rotateX(-6deg) scale(0.78); }
+  .screen-layer[data-from="top"]    { transform: translate3d(0, -260px, -240px) rotateX(-58deg) scale(0.8); }
+  .screen-layer[data-from="bottom"] { transform: translate3d(0, 260px, -240px) rotateX(58deg) scale(0.8); }
+  .screen-layer[data-from="deep"]   { transform: translate3d(0, 0, -560px) rotateZ(20deg) scale(0.4); }
+
+  /* floating 3D badge chips around the phone, each at its own depth */
+  .float-chip {
+    position: absolute;
+    background: var(--surface);
+    border: var(--bw) solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    padding: 9px 13px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+    animation: chip-float 5.5s ease-in-out infinite;
+  }
+  .float-chip .n { font-family: var(--font-display); font-weight: 800; font-size: 13px; }
+  .chip-a { left: -4%; top: 58px; transform: translateZ(90px) rotateZ(-6deg); animation-delay: 0s; }
+  .chip-b { right: -2%; top: 250px; transform: translateZ(70px) rotateZ(5deg); background: var(--accent); animation-delay: 1.1s; }
+  .chip-c { left: 2%; top: 430px; transform: translateZ(110px) rotateZ(-4deg); background: var(--tertiary-container); animation-delay: 2.2s; }
+  @keyframes chip-float {
+    0%, 100% { margin-top: 0px; }
+    50% { margin-top: -14px; }
+  }
+
+  /* mini recreated UI inside phones */
+  .mini-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    box-shadow: 2px 2px 0 var(--border);
+  }
+  .mini-card {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--border);
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .mini-eyebrow { font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .mini-title { font-family: var(--font-display); font-weight: 800; font-size: 17px; margin-top: 3px; }
+  .mini-body { font-size: 10px; color: var(--on-surface-variant); margin-top: 6px; line-height: 1.4; }
+  .mini-btn {
+    margin-top: 10px;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 2px 2px 0 var(--border);
+  }
+  .mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .mini-flip {
+    aspect-ratio: 3/4;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .mini-status {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 8px; margin-bottom: 10px; color: var(--on-surface-variant);
+  }
+
+  /* ---- higher-fidelity recreated chrome, matching the real app screens ---- */
+  .mini-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .mini-wordmark { font-family: var(--font-display); font-weight: 800; font-size: 11px; letter-spacing: 0.01em; }
+  .mini-avatar {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--primary); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: #fff;
+  }
+  .mini-appbar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .mini-back { font-size: 12px; line-height: 1; }
+  .mini-appbar-title { font-family: var(--font-display); font-weight: 800; font-size: 13px; flex: 1; text-align: center; margin-right: 12px; }
+  .mini-greet-eyebrow { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); }
+  .mini-headline { font-family: var(--font-display); font-weight: 800; font-size: 16px; line-height: 1.15; margin-top: 3px; margin-bottom: 12px; }
+
+  .mini-icon-badge {
+    width: 22px; height: 22px; border-radius: 5px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    position: relative;
+  }
+  .mini-lock {
+    position: absolute; right: -4px; bottom: -4px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--surface); border: 1.2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 6px;
+  }
+
+  .mini-img {
+    height: 70px; border-radius: 8px; border: 2px solid var(--border);
+    box-shadow: 3px 3px 0 var(--border);
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 55%, var(--tertiary) 100%);
+    position: relative; overflow: hidden; margin-bottom: 10px;
+    display: flex; align-items: flex-end; padding: 8px;
+  }
+  .mini-img .mini-tag { position: absolute; top: 8px; left: 8px; }
+  .mini-author-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .mini-author-row .mini-avatar { width: 14px; height: 14px; font-size: 6px; background: var(--secondary); }
+  .mini-author-row span { font-family: var(--font-mono); font-size: 7px; color: var(--on-surface-variant); }
+
+  .mini-timer-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--accent); color: var(--on-accent);
+    border: 2px solid var(--border); border-radius: 6px;
+    padding: 6px 9px; margin-bottom: 10px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 8px;
+  }
+  .mini-def-card {
+    aspect-ratio: 3/4; border: 2px solid var(--border); border-radius: 6px;
+    box-shadow: 2px 2px 0 var(--border);
+    padding: 5px; display: flex; flex-direction: column; justify-content: center;
+  }
+  .mini-def-card .lbl { font-family: var(--font-mono); font-size: 5px; color: var(--secondary); letter-spacing: 0.04em; }
+  .mini-def-card p { font-size: 6px; line-height: 1.25; margin-top: 2px; color: var(--on-surface-variant); }
+
+  .mini-bottomnav {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 8px 4px 10px;
+    background: var(--background);
+    border-top: 1.5px solid var(--border);
+  }
+  .mini-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .mini-nav-item .ic { font-size: 12px; line-height: 1; opacity: 0.55; }
+  .mini-nav-item .lbl { font-family: var(--font-mono); font-size: 5.5px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--on-surface-variant); }
+  .mini-nav-item.active .ic { opacity: 1; }
+  .mini-nav-item.active .lbl { color: var(--primary); font-weight: 700; }
+  .has-nav { padding-bottom: 42px !important; }
+
+  /* ---------- stat strip ---------- */
+  .strip {
+    border-top: var(--bw) solid var(--border);
+    border-bottom: var(--bw) solid var(--border);
+    background: var(--on-bg);
+    color: #fff;
+    padding: 16px 0;
+    overflow: hidden;
+  }
+  .strip-track {
+    display: flex;
+    gap: 48px;
+    white-space: nowrap;
+    animation: marquee 22s linear infinite;
+    width: max-content;
+  }
+  .strip-track span {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+  .strip-track span b { color: var(--accent); }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---------- sections ---------- */
+  section { padding: 96px 0; }
+  .section-head { max-width: 640px; margin: 0 auto 52px; text-align: center; }
+  .section-head .eyebrow { margin-bottom: 18px; }
+  .section-head h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; }
+  .section-head p { margin-top: 14px; font-size: 16px; color: var(--on-surface-variant); line-height: 1.6; }
+
+  /* features */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 26px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .feature-card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+  .feature-icon {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    border: var(--bw) solid var(--border);
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+  .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .feature-card p { font-size: 14.5px; color: var(--on-surface-variant); line-height: 1.55; }
+
+  /* why download */
+  .why-wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (min-width: 900px) { .why-wrap { grid-template-columns: 0.9fr 1.1fr; } }
+  .why-visual {
+    background: var(--primary);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 36px;
+    color: var(--on-primary);
+    position: relative;
+    overflow: hidden;
+    transform: rotateZ(-1.5deg);
+  }
+  .why-visual .streak-row { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+  .streak-day {
+    width: 30px; height: 30px; border-radius: 7px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .streak-day.on { background: var(--accent); color: var(--on-accent); border-color: var(--border); }
+  .why-list { display: flex; flex-direction: column; gap: 22px; }
+  .why-item { display: flex; gap: 16px; align-items: flex-start; }
+  .why-item .check {
+    flex: 0 0 auto;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--tertiary-container);
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    color: var(--tertiary);
+  }
+  .why-item h4 { font-size: 16.5px; font-weight: 700; }
+  .why-item p { margin-top: 4px; font-size: 14px; color: var(--on-surface-variant); line-height: 1.55; }
+
+  /* download */
+  .download-panel {
+    background: var(--on-bg);
+    color: #fff;
+    border: var(--bw) solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    padding: 56px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .download-panel h2 { font-size: clamp(26px, 4vw, 40px); font-weight: 800; max-width: 640px; margin: 0 auto; }
+  .download-panel p.sub { margin-top: 14px; color: rgba(255,255,255,0.7); font-size: 15px; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .qr-row {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .qr-card {
+    background: #fff;
+    color: var(--on-bg);
+    border-radius: 16px;
+    padding: 20px;
+    width: 190px;
+    box-shadow: 6px 6px 0 rgba(255,255,255,0.15);
+  }
+  .qr-code {
+    width: 148px; height: 148px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+  }
+  .qr-code canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+  .qr-card .store-name { margin-top: 12px; font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+  .qr-card .soon-pill {
+    margin-top: 6px;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.05em;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .download-note {
+    margin-top: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.02em;
+  }
+
+  .notify-form {
+    margin: 32px auto 0;
+    max-width: 420px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .notify-input {
+    flex: 1 1 220px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 13px 16px;
+    border: var(--bw) solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--on-bg);
+  }
+  .notify-input::placeholder { color: var(--on-surface-variant); }
+  .notify-input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .notify-form .btn { flex: 0 0 auto; }
+  .notify-success {
+    margin: 28px auto 0;
+    max-width: 420px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .or-divider {
+    margin: 34px auto 0;
+    max-width: 420px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  .or-divider::before, .or-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* footer */
+  footer {
+    border-top: var(--bw) solid var(--border);
+    padding: 40px 0;
+  }
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  .footer-inner .brand span { font-size: 16px; }
+  .footer-meta { font-family: var(--font-mono); font-size: 11px; color: var(--on-surface-variant); text-align: right; }
+
+  /* reveal-on-scroll */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 720px) {
+    nav.links { display: none; }
+    .hero-3d-stage { height: 460px; }
+    .phone-hero { width: 210px; margin-left: -105px; top: 30px; }
+    .phone-hero-screen { height: 380px; }
+    .float-chip { font-size: 9.5px; padding: 7px 10px; }
+    .chip-a { left: -6%; top: 40px; }
+    .chip-b { right: -6%; top: 190px; }
+    .chip-c { left: -2%; top: 330px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="blob" style="width:420px;height:420px;background:var(--primary-container);top:-120px;left:-140px;"></div>
+<div class="blob" style="width:340px;height:340px;background:var(--tertiary-container);top:520px;right:-160px;opacity:0.4;"></div>
+<div class="blob" style="width:300px;height:300px;background:var(--secondary-container);top:1400px;left:-120px;opacity:0.4;"></div>
+
+<header class="site-nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <span>FundaMental</span>
+    </a>
+    <nav class="links">
+      <a href="#features">Features</a>
+      <a href="#why">Why FundaMental</a>
+      <a href="#download">Download</a>
+    </nav>
+    <a href="#notifyEmail" class="btn accent nav-cta" id="navNotifyCta">Get Notified →</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow">✦ Funda over FOMO</span>
+        <h1>Stop Nodding Along.<br />Start <span class="accent-underline">Actually Getting It</span>.</h1>
+        <p class="lead">
+          You don't need another headline you half-understand. FundaMental turns
+          dense topics — investing, markets, AI, and whatever comes next — into
+          a five-minute daily habit: one sharp term, one honest explainer, and
+          a game that forces you to actually remember it. No jargon-soup.
+          No FOMO. Just the fundamentals.
+        </p>
+        <div class="hero-actions">
+          <div class="store-badge">
+            <span class="icon"></span>
+            <span class="txt"><small>Download on the</small><strong>App Store</strong></span>
+            <span class="soon">SOON</span>
+          </div>
+          <div class="store-badge">
+            <span class="icon">▶</span>
+            <span class="txt"><small>Get it on</small><strong>Google Play</strong></span>
+            <span class="soon">SOON</span>
+          </div>
+        </div>
+        <div class="proof-row">
+          <span class="proof-chip">⏱ 5 Min / Day</span>
+          <span class="proof-chip">🧠 Active Recall, Not Passive Reading</span>
+          <span class="proof-chip">🚫 Zero Fluff</span>
+        </div>
+      </div>
+
+      <div class="hero-3d-stage" id="heroStage">
+        <div class="hero-3d-scene" id="heroScene">
+          <div class="orbit-ring"></div>
+          <div class="orbit-ring r2"></div>
+          <div class="phone-shadow"></div>
+
+          <div class="float-chip chip-a">🔥 <span class="n">7-Day</span> Streak</div>
+          <div class="float-chip chip-b">📚 <span class="n">New Terms</span> Weekly</div>
+          <div class="float-chip chip-c">🧩 <span class="n">Term</span> Match</div>
+
+          <div class="phone-hero">
+            <div class="phone-hero-frame">
+              <div class="side-btn power"></div>
+              <div class="side-btn vol1"></div>
+              <div class="side-btn vol2"></div>
+              <div class="phone-hero-screen">
+                <div class="dynamic-island"></div>
+
+                <!-- Home -->
+                <div class="screen-layer has-nav" data-from="left" id="scr0">
+                  <div class="mini-topbar">
+                    <span class="mini-wordmark">FUNDAMENTAL</span>
+                    <span class="mini-avatar">👤</span>
+                  </div>
+                  <div class="mini-greet-eyebrow">Good Morning</div>
+                  <div class="mini-headline">Explore the<br />Fundamentals</div>
+                  <div class="mini-card" style="background:var(--primary-container); position:relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                      <div>
+                        <div class="mini-eyebrow" style="color:var(--primary);">Word of the Day</div>
+                        <div class="mini-title">SIP</div>
+                      </div>
+                      <span class="mini-tag" style="background:var(--primary); color:#fff;">SIP</span>
+                    </div>
+                    <div class="mini-body">Investing a fixed amount in a mutual fund at regular intervals, instead of all at once.</div>
+                  </div>
+                  <div class="mini-card" style="background:var(--primary); color:#fff; border-color:var(--border);">
+                    <span class="mini-tag" style="background:var(--on-bg); color:#fff;">Funda over FOMO</span>
+                    <div class="mini-title" style="color:#fff; font-size:13px; margin-top:8px;">What Is an FPO — and Can It Be Cancelled?</div>
+                    <span class="mini-btn" style="background:#fff; color:var(--on-bg);">Read the Analysis →</span>
+                  </div>
+                  <div class="mini-bottomnav">
+                    <div class="mini-nav-item active"><span class="ic">▦</span><span class="lbl">Home</span></div>
+                    <div class="mini-nav-item"><span class="ic">📖</span><span class="lbl">Archive</span></div>
+                    <div class="mini-nav-item"><span class="ic">Ａ</span><span class="lbl">Glossary</span></div>
+                    <div class="mini-nav-item"><span class="ic">🧩</span><span class="lbl">Games</span></div>
+                  </div>
+                </div>
+
+                <!-- Glossary -->
+                <div class="screen-layer has-nav" data-from="right" id="scr1">
+                  <div class="mini-appbar" style="justify-content:center;">
+                    <span class="mini-appbar-title" style="margin-right:0;">Glossary</span>
+                  </div>
+                  <div style="display:flex; gap:6px; margin-bottom:10px;">
+                    <span class="mini-tag" style="background:var(--primary); color:#fff; flex:1; text-align:center;">Stock Market ▾</span>
+                    <span class="mini-tag" style="flex:1; text-align:center; opacity:0.5;">Subcategory ▾</span>
+                  </div>
+                  <div class="mini-card" style="background:var(--tertiary-container); min-height:220px; display:flex; flex-direction:column; justify-content:center; position:relative;">
+                    <div class="mini-icon-badge" style="background:var(--tertiary); color:#fff; position:absolute; top:12px; left:12px;">📈</div>
+                    <span class="mini-tag" style="background:var(--tertiary); color:#fff; align-self:flex-end;">Candlestick</span>
+                    <div class="mini-eyebrow" style="color:var(--tertiary); margin-top:16px;">Term</div>
+                    <div class="mini-title" style="font-size:24px;">Doji</div>
+                    <div style="width:30px;height:4px;background:var(--tertiary);border-radius:3px;margin:8px 0;"></div>
+                    <div class="mini-body">A candle where open and close are almost equal, showing indecision.</div>
+                  </div>
+                  <div style="text-align:center; margin-top:8px; font-family:var(--font-mono); font-size:6.5px; color:var(--on-surface-variant);">⌃ SWIPE UP FOR NEXT</div>
+                  <div class="mini-bottomnav">
+                    <div class="mini-nav-item"><span class="ic">▦</span><span class="lbl">Home</span></div>
+                    <div class="mini-nav-item"><span class="ic">📖</span><span class="lbl">Archive</span></div>
+                    <div class="mini-nav-item active"><span class="ic">Ａ</span><span class="lbl">Glossary</span></div>
+                    <div class="mini-nav-item"><span class="ic">🧩</span><span class="lbl">Games</span></div>
+                  </div>
+                </div>
+
+                <!-- Term Match -->
+                <div class="screen-layer" data-from="deep" id="scr2">
+                  <div class="mini-appbar">
+                    <span class="mini-back">←</span>
+                    <span class="mini-appbar-title">Term Match</span>
+                  </div>
+                  <div class="mini-timer-bar"><span>MEMORIZE THE BOARD!</span><span>15s</span></div>
+                  <div class="mini-grid">
+                    <div class="mini-def-card" style="background:var(--secondary-container);"><span class="lbl">DEFINITION</span><p>A payment method for share applications.</p></div>
+                    <div class="mini-def-card" style="background:var(--primary-container);"><span class="lbl">DEFINITION</span><p>A fixed monthly investment into a fund.</p></div>
+                    <div class="mini-def-card" style="background:var(--tertiary-container);"><span class="lbl">DEFINITION</span><p>Training a model on labeled examples.</p></div>
+                    <div class="mini-def-card" style="background:var(--tertiary-container);"><span class="lbl">DEFINITION</span><p>A candle showing buyer/seller indecision.</p></div>
+                    <div class="mini-def-card" style="background:var(--secondary-container);"><span class="lbl">DEFINITION</span><p>The right to buy a stock at a fixed price.</p></div>
+                    <div class="mini-def-card" style="background:var(--primary-container);"><span class="lbl">DEFINITION</span><p>Extra shares given to holders for free.</p></div>
+                  </div>
+                </div>
+
+                <!-- Article -->
+                <div class="screen-layer has-nav" data-from="bottom" id="scr3">
+                  <div class="mini-img">
+                    <span class="mini-tag" style="background:var(--secondary); color:#fff;">Corporate Actions</span>
+                  </div>
+                  <div class="mini-title" style="font-size:15px;">Bonus Issue — Why It Doesn't Make You Richer</div>
+                  <div class="mini-author-row">
+                    <span class="mini-avatar">Ｆ</span>
+                    <span>FundaMental Research · 6 min read</span>
+                  </div>
+                  <div class="mini-body" style="margin-top:10px;">A company gives existing shareholders extra shares for free, in a fixed ratio to what they already hold...</div>
+                  <div class="mini-bottomnav">
+                    <div class="mini-nav-item active"><span class="ic">▦</span><span class="lbl">Home</span></div>
+                    <div class="mini-nav-item"><span class="ic">📖</span><span class="lbl">Archive</span></div>
+                    <div class="mini-nav-item"><span class="ic">Ａ</span><span class="lbl">Glossary</span></div>
+                    <div class="mini-nav-item"><span class="ic">🧩</span><span class="lbl">Games</span></div>
+                  </div>
+                </div>
+
+                <!-- Games hub -->
+                <div class="screen-layer has-nav" data-from="top" id="scr4">
+                  <div class="mini-appbar"><span class="mini-appbar-title" style="text-align:left; margin-right:0;">Games</span></div>
+                  <div class="mini-card" style="background:var(--surface); display:flex; gap:8px; align-items:flex-start;">
+                    <div class="mini-icon-badge" style="background:var(--secondary); color:#fff;">🧩</div>
+                    <div style="flex:1;">
+                      <div class="mini-title" style="font-size:13px;">Term Match</div>
+                      <div class="mini-body" style="font-size:8px; margin-top:2px;">Flip cards to match terms with definitions.</div>
+                      <span class="mini-btn" style="background:var(--secondary); color:#fff; margin-top:6px;">Play</span>
+                    </div>
+                  </div>
+                  <div class="mini-card" style="background:var(--surface); opacity:0.55; display:flex; gap:8px; align-items:flex-start;">
+                    <div class="mini-icon-badge" style="background:var(--primary); color:#fff;">🗓<span class="mini-lock">🔒</span></div>
+                    <div style="flex:1;">
+                      <div class="mini-title" style="font-size:13px;">Daily Term</div>
+                      <span class="mini-btn" style="margin-top:6px;">Coming Soon</span>
+                    </div>
+                  </div>
+                  <div class="mini-bottomnav">
+                    <div class="mini-nav-item"><span class="ic">▦</span><span class="lbl">Home</span></div>
+                    <div class="mini-nav-item"><span class="ic">📖</span><span class="lbl">Archive</span></div>
+                    <div class="mini-nav-item"><span class="ic">Ａ</span><span class="lbl">Glossary</span></div>
+                    <div class="mini-nav-item active"><span class="ic">🧩</span><span class="lbl">Games</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT STRIP -->
+  <div class="strip">
+    <div class="strip-track" id="stripTrack">
+      <span>✦ <b>FUNDA OVER FOMO</b></span>
+      <span>✦ AI · WEALTH · STOCK MARKET · AND MORE</span>
+      <span>✦ FIVE MINUTES, EVERY DAY</span>
+      <span>✦ READ IT. PLAY IT. REMEMBER IT.</span>
+      <span>✦ NO FLUFF, EVER</span>
+      <span>✦ <b>FUNDA OVER FOMO</b></span>
+      <span>✦ AI · WEALTH · STOCK MARKET · AND MORE</span>
+      <span>✦ FIVE MINUTES, EVERY DAY</span>
+      <span>✦ READ IT. PLAY IT. REMEMBER IT.</span>
+      <span>✦ NO FLUFF, EVER</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">The Method</span>
+        <h2>Reading Alone<br />Doesn't Work. This Does.</h2>
+        <p>Most people forget most of what they read within a day. Every part of FundaMental is built around the one thing that actually works: active recall.</p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background:var(--primary-container);">📅</div>
+          <h3>Word of the Day</h3>
+          <p>One sharp, plain-English term every single day — the same low-friction habit loop that made language apps addictive, pointed at your financial literacy instead.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background:var(--secondary-container);">📰</div>
+          <h3>Deep-Dive Articles</h3>
+          <p>"Funda over FOMO" analysis on real events — IPOs, bonus issues, corporate actions — that explains the mechanics, not just the headline.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background:var(--tertiary-container);">🧩</div>
+          <h3>Term Match</h3>
+          <p>A memorize-then-match flashcard game with a real move budget — reading is step one, Term Match is where the terms actually become memory.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background:var(--accent); color:var(--on-accent);">🔍</div>
+          <h3>Filterable Glossary</h3>
+          <p>Every term ever published, browsable as a swipe-through carousel — filter by Category and Subcategory to drill into exactly the topic you care about.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background:var(--primary-container);">🇮🇳</div>
+          <h3>Real Indian-Market Context</h3>
+          <p>ASBA, NPS, PRAN, T+1 settlement — built around the instruments and rules that actually apply to Indian investors, not generic textbook definitions.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background:var(--secondary-container);">◼</div>
+          <h3>Zero-Fluff Design</h3>
+          <p>Bold, neo-brutalist UI with no infinite scroll and no dark patterns — hard borders, clear hierarchy, and a UI that gets out of the way of the content.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section id="why">
+    <div class="container why-wrap">
+      <div class="why-visual reveal">
+        <span class="mini-tag" style="background:var(--accent); color:var(--on-accent);">Your Streak</span>
+        <div class="mini-title" style="color:#fff; font-size:24px; margin-top:14px;">7-Day Streak 🔥</div>
+        <p style="color:rgba(255,255,255,0.75); font-size:13.5px; margin-top:6px;">Small daily reps beat cramming — every time.</p>
+        <div class="streak-row">
+          <div class="streak-day on">M</div>
+          <div class="streak-day on">T</div>
+          <div class="streak-day on">W</div>
+          <div class="streak-day on">T</div>
+          <div class="streak-day on">F</div>
+          <div class="streak-day on">S</div>
+          <div class="streak-day on">S</div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <span class="eyebrow">Why FundaMental</span>
+        <h2 style="margin-top:18px; font-size: clamp(26px, 3.6vw, 36px);">For everyone who's nodded along and had no idea what was actually being said</h2>
+        <div class="why-list" style="margin-top:32px;">
+          <div class="why-item">
+            <div class="check">✓</div>
+            <div>
+              <h4>Five minutes, not fifty</h4>
+              <p>One term, one card, one round of Term Match. Built to fit into a commute, not replace your evening.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="check">✓</div>
+            <div>
+              <h4>Structured, not scattered</h4>
+              <p>Every term sits under a real taxonomy — Category → Subcategory → Topic — so you always know where you are.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="check">✓</div>
+            <div>
+              <h4>Retention, not just reading</h4>
+              <p>Term Match forces active recall right after you read — the single biggest lever for actually remembering something.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="check">✓</div>
+            <div>
+              <h4>No ads, no dark patterns</h4>
+              <p>No infinite feed engineered to trap you. Learn your five minutes, close the app, get on with your day.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section id="download">
+    <div class="container">
+      <div class="download-panel reveal">
+        <span class="eyebrow">Coming Soon</span>
+        <h2 style="margin-top:18px;">Funda over FOMO starts on your phone</h2>
+        <p class="sub">FundaMental is in final testing ahead of launch. Leave your email and we'll let you know the moment it's live.</p>
+
+        <form class="notify-form" id="notifyForm">
+          <input type="email" id="notifyEmail" class="notify-input" placeholder="you@email.com" required />
+          <button type="submit" class="btn accent">Notify Me →</button>
+        </form>
+        <p class="notify-success" id="notifySuccess" hidden>✓ You're on the list — we'll email you the moment FundaMental launches.</p>
+
+        <div class="or-divider">or scan to get notified</div>
+
+        <div class="qr-row">
+          <div class="qr-card">
+            <div class="qr-code"><canvas id="qrApple" width="148" height="148"></canvas></div>
+            <div class="store-name"> App Store</div>
+            <span class="soon-pill">Coming Soon</span>
+          </div>
+          <div class="qr-card">
+            <div class="qr-code"><canvas id="qrGoogle" width="148" height="148"></canvas></div>
+            <div class="store-name">▶ Google Play</div>
+            <span class="soon-pill">Coming Soon</span>
+          </div>
+        </div>
+
+        <p class="download-note">QR codes will link directly to the live store listings at launch.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <a href="#top" class="brand">
+      <span>FundaMental</span>
+    </a>
+    <div class="footer-meta">
+      Funda over FOMO.<br />
+      © 2026 FundaMental. Built for people learning the fundamentals.
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ---- scroll reveal ----
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  revealEls.forEach((el) => io.observe(el));
+
+  // ---- hero: screens flying together to form the whole app ----
+  // Each screen-layer has its own "away" vector (data-from), set in CSS.
+  // Toggling .active animates it home to translate3d(0,0,0); toggling it
+  // off sends it back out along that same vector — so the first entrance
+  // reads as the app assembling itself, and every cycle after reuses the
+  // same motion as a live "screen to screen" showcase.
+  const heroScreens = Array.from(document.querySelectorAll('#heroScene .screen-layer'));
+  if (heroScreens.length) {
+    let activeIndex = -1;
+    const showNext = () => {
+      const next = (activeIndex + 1) % heroScreens.length;
+      heroScreens.forEach((el, i) => el.classList.toggle('active', i === next));
+      activeIndex = next;
+    };
+    showNext(); // first entrance plays immediately: the "assembly" moment
+    setInterval(showNext, 2800);
+  }
+
+  // ---- hero: whole-scene parallax tilt (mouse-driven 3D camera) ----
+  const heroStage = document.getElementById('heroStage');
+  const heroScene = document.getElementById('heroScene');
+  if (heroStage && heroScene && window.matchMedia('(min-width: 980px)').matches) {
+    heroStage.addEventListener('mousemove', (e) => {
+      const rect = heroStage.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      heroScene.style.transform = `rotateY(${px * 16}deg) rotateX(${-py * 12}deg)`;
+    });
+    heroStage.addEventListener('mouseleave', () => {
+      heroScene.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+  }
+
+  // ---- feature card tilt on hover ----
+  document.querySelectorAll('.feature-card').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `rotateY(${px * 8}deg) rotateX(${-py * 8}deg) translateZ(6px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+
+  // ---- decorative pseudo-QR renderer (visual mockup, not a live link) ----
+  function drawFakeQr(canvasId, seed) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const size = 148, cells = 21, cell = size / cells;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#1C1B1B';
+
+    let s = seed;
+    const rand = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return (s / 0x7fffffff); };
+
+    const isFinder = (x, y) => {
+      const inCorner = (cx, cy) => x >= cx && x < cx + 7 && y >= cy && y < cy + 7;
+      return inCorner(0, 0) || inCorner(cells - 7, 0) || inCorner(0, cells - 7);
+    };
+    const drawFinder = (cx, cy) => {
+      ctx.fillRect(cx * cell, cy * cell, 7 * cell, 7 * cell);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect((cx + 1) * cell, (cy + 1) * cell, 5 * cell, 5 * cell);
+      ctx.fillStyle = '#1C1B1B';
+      ctx.fillRect((cx + 2) * cell, (cy + 2) * cell, 3 * cell, 3 * cell);
+    };
+
+    for (let y = 0; y < cells; y++) {
+      for (let x = 0; x < cells; x++) {
+        if (isFinder(x, y)) continue;
+        if (rand() > 0.56) ctx.fillRect(x * cell, y * cell, cell, cell);
+      }
+    }
+    drawFinder(0, 0);
+    drawFinder(cells - 7, 0);
+    drawFinder(0, cells - 7);
+  }
+  drawFakeQr('qrApple', 7331);
+  drawFakeQr('qrGoogle', 4242);
+
+  // ---- "Get Notified" scrolls to and focuses the email field, rather
+  // than just landing on top of the section ----
+  const navNotifyCta = document.getElementById('navNotifyCta');
+  const notifyEmail = document.getElementById('notifyEmail');
+  if (navNotifyCta && notifyEmail) {
+    navNotifyCta.addEventListener('click', (e) => {
+      e.preventDefault();
+      notifyEmail.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => notifyEmail.focus(), 400);
+    });
+  }
+
+  // ---- notify form: client-side only for now — there's no backend
+  // wired up yet to actually store/send this. Swap in a real email
+  // provider (e.g. a hosted form endpoint) before launch. ----
+  const notifyForm = document.getElementById('notifyForm');
+  const notifySuccess = document.getElementById('notifySuccess');
+  if (notifyForm) {
+    notifyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // .notify-form sets its own `display: flex`, which beats the `hidden`
+      // attribute's UA-stylesheet `display: none` — set display directly.
+      notifyForm.style.display = 'none';
+      notifySuccess.hidden = false;
+    });
+  }
+</script>
+
+</body>
+</html>
